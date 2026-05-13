@@ -1,0 +1,164 @@
+{
+  "type": "body",
+  "schema": [
+    {
+      "id": "generated_event_0",
+      "key": "event",
+      "label": "Event Data",
+      "input": "object",
+      "properties": {
+        "num": {
+          "type": "array"
+        }
+      },
+      "validation": {
+        "required": true
+      },
+      "ui": {
+        "helperText": "Provide the event data as a JSON object."
+      }
+    },
+    {
+      "id": "generated_num_1",
+      "key": "num",
+      "label": "Numbers List",
+      "input": "array",
+      "items": {
+        "type": "number"
+      },
+      "validation": {
+        "required": true
+      },
+      "ui": {
+        "helperText": "Enter a list of numbers."
+      },
+      "multiple": false,
+      "default": [
+        1,
+        2,
+        4,
+        5,
+        5
+      ]
+    }
+  ]
+}
+
+
+
+
+
+
+
+
+
+
+
+   """
+    Response 
+    {
+    "data": [
+        {
+            "id": "351f7b62-ef7a-47fb-b330-6125c855e1ca",
+            "event_name": "new_Test_Case_lol", #
+            "event_data": {
+                "num": [
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8
+                ]
+            },
+            "is_default": false,
+            "created_at": "2026-04-05T09:32:10.618906Z",
+            "updated_at": "2026-04-05T09:33:43.969967Z"
+        },
+        {
+            "id": "fdec3cbf-fab5-4b97-bee8-3295aa358c6f",
+            "event_name": "Test Case Making", # ❗️❗️❗️❗️ AI WILL Read  IT 
+            "event_data": {
+                "num": [
+                    2,
+                    344,
+                    5,
+                    3,
+                    111,
+                    323
+                ]
+            },
+            "is_default": false,
+            "created_at": "2026-04-05T10:55:41.853327Z",
+            "updated_at": "2026-04-05T10:55:41.853327Z"
+        },
+        {
+            "id": "f328b129-f0e2-465f-a80a-ee12064aa13b",
+            "event_name": "default",
+            "event_data": {
+                "schema": [
+                    {
+                        "id": "generated_event_0",
+                        "input": "object",
+                        "key": "event",
+                        "label": "Event Data",
+                        "properties": {
+                            "num": {
+                                "type": "array"
+                            }
+                        },
+                        "ui": {
+                            "helperText": "Provide the event data as a JSON object."
+                        },
+                        "validation": {
+                            "required": true
+                        }
+                    },
+                    {
+                        "id": "generated_num_1",
+                        "input": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "key": "num",
+                        "label": "Numbers List",
+                        "ui": {
+                            "helperText": "Enter a list of numbers."
+                        },
+                        "validation": {
+                            "min": 1,
+                            "required": true
+                        }
+                    }
+                ],
+                "type": "body"
+            }, # ❗️❗️❗️❗️ AI WILL Read  IT for default value
+            "is_default": true,
+            "created_at": "2026-04-04T07:31:46.801009Z",
+            "updated_at": "2026-04-05T11:10:04.064678Z"
+        },
+        {
+            "id": "b38c0284-85da-42cc-a675-59fda4957504",
+            "event_name": "Test from local",
+            "event_data": {
+                "num": [
+                    2,
+                    344,
+                    5,
+                    3,
+                    111,
+                    323,
+                    69
+                ]
+            },
+            "is_default": false,
+            "created_at": "2026-04-05T11:06:44.722409Z",
+            "updated_at": "2026-04-05T11:06:44.722409Z"
+        }
+    ],
+    "success": true
+}
+    
+    """
