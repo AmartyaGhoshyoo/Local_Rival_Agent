@@ -1,5 +1,7 @@
 from fastapi import FastAPI, Request, BackgroundTasks
+from pydantic import BaseModel  # <-- Add this line
 import os
+
 import requests
 from dotenv import load_dotenv
 import json
