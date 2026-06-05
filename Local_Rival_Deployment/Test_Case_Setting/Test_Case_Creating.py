@@ -136,22 +136,25 @@ def create_event(function_id: str, event_name: str, event_data: dict):
 
 def create_test_cases_for_function(function_id: str, code: str):
     cases = generate_test_cases(code)
-
     results = []
+    created_cases_summary = [] # 🔥 New list to hold clean data
 
     for case in cases:
-        # Recursively converts the complex Pydantic objects into standard dictionaries
         event_data_dict = convert_to_dict(case.event_data)
-
         res = create_event(
             function_id=function_id,
             event_name=case.event_name,
             event_data=event_data_dict
         )
-
         results.append(res)
+        
+        # 🔥 Save a clean summary for the UI
+        created_cases_summary.append({
+            "test_name": case.event_name,
+            "payload": event_data_dict
+        })
 
-    return results
+    return created_cases_summary # 🔥 Return the clean summary instead of the raw API response!
 
 
 # =========================

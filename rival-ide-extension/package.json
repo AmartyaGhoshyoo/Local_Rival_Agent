@@ -2,7 +2,7 @@
   "name": "rival-ide-extension",
   "displayName": "Rival_IDE_Extension",
   "description": "Deploys code from IDE to the RIVAL Platform",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "engines": {
     "vscode": "^1.80.0"
   },

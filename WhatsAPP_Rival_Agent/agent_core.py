@@ -60,6 +60,7 @@ def _deploy_saved_code(code: str) -> str:
 def save_cortexone_code(context: UserContext, python_source: str) -> str:
     """Save a complete Python file for CortexOne."""
     context.last_code = python_source
+    print("Saved code to context.", context.last_code)
     return f"Saved handler source ({len(python_source)} chars). You can run tests or deploy when the user asks."
 
 # 🔥 FIX 2: Added a new tool to retrieve the code!
@@ -67,6 +68,7 @@ def save_cortexone_code(context: UserContext, python_source: str) -> str:
 def get_saved_cortexone_code(context: UserContext) -> str:
     """Call this ONLY when the user explicitly asks to see, view, or show the saved code."""
     if not context.last_code:
+        print("No code has been saved yet.")
         return "No code has been saved yet."
     return context.last_code
 
@@ -122,11 +124,13 @@ Rules:
 - Usually, prefer short WhatsApp-friendly summaries and avoid massive code blocks.
 - HOWEVER, if the user explicitly asks to "show the code", "see the code", or "print the code", you MUST use `get_saved_cortexone_code` and send them the full code.
 - If the user has not saved code yet, do not call run or deploy.
+- If the user wants to search for, test, or interact with marketplace agents on rival.io, instruct them to simply type "search agent". Do not try to write code for marketplace searches yourself.
 """
 
 agent = Agent(
     name="WhatsApp CortexOne Assistant",
     instructions=_build_system_prompt(),
+    model='gpt-5-chat-latest',
     # 🔥 Added the new tool to the agent's brain!
     tools=[save_cortexone_code, get_saved_cortexone_code, run_saved_code_locally, deploy_saved_code_to_cortexone],
 )
@@ -141,3 +145,54 @@ async def handle_user_message(user_text: str, sender_id: str) -> str:
     session = get_agent_session(sender_id)
     result = await Runner.run(agent, user_text, context=context, session=session)
     return result.final_output
+
+
+if __name__ == "__main__":
+    import asyncio
+
+    async def test_agent_flow():
+        # Simulate a unique WhatsApp user ID
+        test_sender_id = "test_user_999"
+
+        print("==================================================")
+        print("🧪 STARTING AGENT CORE TEST")
+        print("==================================================")
+
+        # ---------------------------------------------------------
+        # TEST 1: Requesting code generation (Triggers save_cortexone_code)
+        # ---------------------------------------------------------
+        prompt_1 = "Write a CortexOne handler that adds two numbers, 'a' and 'b', from the event JSON."
+        print(f"\n👤 User: {prompt_1}")
+        print("🤖 AI is thinking...")
+        
+        response_1 = await handle_user_message(prompt_1, test_sender_id)
+        
+        print(f"✅ AI Response:\n{response_1}")
+        
+        # Verify the context memory directly to prove the tool worked silently
+        ctx = get_user_context(test_sender_id)
+        print(f"\n🔍 DIRECT MEMORY CHECK:")
+        if ctx.last_code:
+            print(f"   -> Successfully saved {len(ctx.last_code)} characters to UserContext!")
+        else:
+            print("   -> 🚨 ERROR: last_code is None. The save tool was not called.")
+
+        print("\n--------------------------------------------------")
+
+        # ---------------------------------------------------------
+        # TEST 2: Requesting to view the code (Triggers get_saved_cortexone_code)
+        # ---------------------------------------------------------
+        prompt_2 = "Show me the code you just wrote."
+        print(f"\n👤 User: {prompt_2}")
+        print("🤖 AI is thinking...")
+        
+        response_2 = await handle_user_message(prompt_2, test_sender_id)
+        
+        print(f"✅ AI Response:\n{response_2}")
+
+        print("\n==================================================")
+        print("🏁 TEST COMPLETE")
+        print("==================================================")
+
+    # Run the async test loop
+    asyncio.run(test_agent_flow())

@@ -1,17 +1,13 @@
 from dotenv import load_dotenv
 import os
+import requests
+import json
 
 load_dotenv()
-
-
-
 
 def auto_generate_complete_metadata(function_slug: str):
     token = os.getenv("BEARER_TOKEN")
     org_id = os.getenv("ORG_ID")
-
-    import requests
-    import json
 
     headers = {
         "X-Organization-ID": org_id,
@@ -29,17 +25,12 @@ def auto_generate_complete_metadata(function_slug: str):
         details_url,
         headers=headers
     )
-
+    
     details_data = details_response.json()["data"]
-
     function_id = details_data["function_id"]
-
     function_name = details_data["function_name"]
-
     short_description = details_data["short_description"]
-
     runtime = details_data["versions"][0]["runtime"]
-
     files = details_data["versions"][0]["files"]
 
     # =========================================================
@@ -47,9 +38,7 @@ def auto_generate_complete_metadata(function_slug: str):
     # =========================================================
 
     code_payload = []
-
     for file in files:
-
         code_payload.append({
             "filename": file["meta"]["name"],
             "data": file["data"],
@@ -59,22 +48,18 @@ def auto_generate_complete_metadata(function_slug: str):
     # =========================================================
     # STEP 3: GENERATE OVERVIEW
     # =========================================================
+    
+    # Updated Endpoint URL
+    rival_bot_url = "https://cortexone.rival.io/api/v1/rival-bot/conversations"
 
     overview_payload = {
-        "prompt": "Generate an overview with strengths and limitations for this tool",
-        "chats": [],
-        "context": {},
         "event": 11,
-        "meta": {
-            "name": function_name,
-            "description": short_description
-        }
+        "function_id": function_id,
+        "prompt": "Generate overview"
     }
 
-    rival_url = "https://cortexone.rival.io/api/app/rival-assistant"
-
     overview_response = requests.post(
-        rival_url,
+        rival_bot_url,
         headers={
             **headers,
             "Content-Type": "application/json",
@@ -87,28 +72,17 @@ def auto_generate_complete_metadata(function_slug: str):
     final_overview = None
 
     for line in overview_response.iter_lines():
-
         if line:
-
             decoded = line.decode("utf-8")
-
             if decoded.startswith("data:"):
-
                 try:
-
-                    parsed = json.loads(
-                        decoded.replace("data: ", "")
-                    )
-
+                    parsed = json.loads(decoded.replace("data: ", ""))
                     if parsed.get("event") == "done":
-
                         final_overview = parsed["response"]["overview"]
-
                 except Exception:
                     pass
 
     if not final_overview:
-
         return {
             "error": "Overview generation failed"
         }
@@ -118,20 +92,13 @@ def auto_generate_complete_metadata(function_slug: str):
     # =========================================================
 
     documentation_payload = {
-        "prompt": "Generate documentation for this tool",
-        "chats": [],
-        "context": {},
         "event": 10,
-        "meta": {
-            "name": function_name,
-            "description": short_description,
-            "runtime": runtime
-        },
-        "code": code_payload
+        "function_id": function_id,
+        "prompt": "Generate documentation"
     }
 
     documentation_response = requests.post(
-        rival_url,
+        rival_bot_url,
         headers={
             **headers,
             "Content-Type": "application/json",
@@ -144,28 +111,17 @@ def auto_generate_complete_metadata(function_slug: str):
     final_documentation = None
 
     for line in documentation_response.iter_lines():
-
         if line:
-
             decoded = line.decode("utf-8")
-
             if decoded.startswith("data:"):
-
                 try:
-
-                    parsed = json.loads(
-                        decoded.replace("data: ", "")
-                    )
-
+                    parsed = json.loads(decoded.replace("data: ", ""))
                     if parsed.get("event") == "done":
-
                         final_documentation = parsed["response"]["documentation"]
-
                 except Exception:
                     pass
 
     if not final_documentation:
-
         return {
             "error": "Documentation generation failed"
         }
@@ -175,25 +131,12 @@ def auto_generate_complete_metadata(function_slug: str):
     # =========================================================
 
     combined_long_description = json.dumps({
-
-        "what_it_does":
-        final_overview.get("what_it_does", ""),
-
-        "how_it_works":
-        final_overview.get("how_it_works", ""),
-
-        "overview":
-        final_overview.get("what_it_does", ""),
-
-        "strengths":
-        final_overview.get("strengths", []),
-
-        "limitations":
-        final_overview.get("limitations", []),
-
-        "long_description":
-        final_documentation
-
+        "what_it_does": final_overview.get("what_it_does", ""),
+        "how_it_works": final_overview.get("how_it_works", ""),
+        "overview": final_overview.get("what_it_does", ""),
+        "strengths": final_overview.get("strengths", []),
+        "limitations": final_overview.get("limitations", []),
+        "long_description": final_documentation
     })
 
     # =========================================================
@@ -221,21 +164,13 @@ def auto_generate_complete_metadata(function_slug: str):
     # =========================================================
 
     changelog_payload = {
-        "prompt": "Generate a changelog for this release",
-        "chats": [],
-        "context": {},
         "event": 9,
-        "code": code_payload,
-        "versions": [
-            {
-                "version": "draft",
-                "files": code_payload
-            }
-        ]
+        "function_id": function_id,
+        "prompt": "Generate changelog for the draft version"
     }
 
     changelog_response = requests.post(
-        rival_url,
+        rival_bot_url,
         headers={
             **headers,
             "Content-Type": "application/json",
@@ -248,28 +183,17 @@ def auto_generate_complete_metadata(function_slug: str):
     final_changelog = None
 
     for line in changelog_response.iter_lines():
-
         if line:
-
             decoded = line.decode("utf-8")
-
             if decoded.startswith("data:"):
-
                 try:
-
-                    parsed = json.loads(
-                        decoded.replace("data: ", "")
-                    )
-
+                    parsed = json.loads(decoded.replace("data: ", ""))
                     if parsed.get("event") == "done":
-
                         final_changelog = parsed["response"]["reply"]
-
                 except Exception:
                     pass
 
     if not final_changelog:
-
         return {
             "error": "Changelog generation failed"
         }
@@ -305,9 +229,8 @@ def auto_generate_complete_metadata(function_slug: str):
 
 
 if __name__ == "__main__":
-
     print(
         auto_generate_complete_metadata(
-            "chord-transposition-assistant"
+            "project-timeline-intelligence-engine"
         )
     )
